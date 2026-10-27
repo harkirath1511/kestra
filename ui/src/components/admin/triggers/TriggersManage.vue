@@ -116,7 +116,7 @@
                             effect="light"
                             popperClass="wide-tooltip"
                         >
-                            <InformationOutline class="header-tooltip-icon" />
+                            <Information class="header-tooltip-icon" />
                         </KsTooltip>
                     </span>
                 </template>
@@ -385,6 +385,7 @@
     import {useAuthStore} from "override/stores/auth"
     import BreakableText from "../../BreakableText"
     import {storageKeys} from "../../../utils/constants"
+    import {hasMissingRequiredInputs} from "../../../utils/inputs"
     import * as TriggersAPI from "@kestra-io/kestra-sdk/triggers"
     import {searchTriggers, type TriggerDeleteOptions} from "../../../utils/triggers"
     import {useExecutionsStore} from "../../../stores/executions"
@@ -399,7 +400,7 @@
     import CalendarCollapseHorizontalOutline from "vue-material-design-icons/CalendarCollapseHorizontalOutline.vue"
     import Delete from "vue-material-design-icons/Delete.vue"
     import DotsVertical from "vue-material-design-icons/DotsVertical.vue"
-    import InformationOutline from "vue-material-design-icons/InformationOutline.vue"
+    import Information from "vue-material-design-icons/Information.vue"
     import Restart from "vue-material-design-icons/Restart.vue"
     import TextSearch from "vue-material-design-icons/TextSearch.vue"
 
@@ -999,20 +1000,8 @@
         if (end && start > end) {
             return true
         }
-        if (flowStore.flow?.inputs) {
-            const requiredInputs = flowStore.flow.inputs
-                .filter(input => input?.required !== false)
-                .map(input => input.id)
-
-            if (requiredInputs.length > 0) {
-                if (!inputs) {
-                    return true
-                }
-                const fillInputs = Object.keys(inputs).filter(key => inputs[key] !== null && inputs[key] !== undefined)
-                if (requiredInputs.sort().join(",") !== fillInputs.sort().join(",")) {
-                    return true
-                }
-            }
+        if (hasMissingRequiredInputs(flowStore.flow?.inputs, inputs)) {
+            return true
         }
 
         return labels.some(label => Boolean(label.key) !== Boolean(label.value))
